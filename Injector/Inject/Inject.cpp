@@ -5,10 +5,14 @@
 #include <string>
 #include <windows.h>
 
-HANDLE proc;
+DWORD pidproc;
 
 void exitproc(int ret) {
-    TerminateProcess(proc, 0);
+    HANDLE proc = OpenProcess(PROCESS_TERMINATE, 0, pidproc);
+
+    if (proc != INVALID_HANDLE_VALUE) {
+        TerminateProcess(proc, 0);
+    }
 
     std::exit(ret);
 }
@@ -31,7 +35,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
      Dll:
       The DLL path/name to inject
     */
-    
+
 #ifdef _DEBUG
     std::cout << "Opening executable\n";
 #endif
@@ -51,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef _DEBUG
         std::cout << "Error opening exe: " << GetLastError() << "\n";
 #endif
-        return 1; 
+        return 1;
     }
 #ifdef _DEBUG
     else {
@@ -63,7 +67,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     DWORD perms = PROCESS_CREATE_THREAD | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_TERMINATE;
     HANDLE proc = OpenProcess(perms, FALSE, pi.dwProcessId);
 #else
-    proc = pi.hProcess;
+    HANDLE proc = pi.hProcess;
+    pidproc = pi.dwProcessId;
 #endif
     HANDLE tr;
     std::string szLibPath;
@@ -84,7 +89,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
         exitproc(2);
     }
-    
+
 #ifdef _DEBUG
     std::cout << "DLL Loaded with path: " << szLibPath << "\n";
 #endif
@@ -108,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 
     tr = CreateRemoteThread(proc, NULL, 0, (LPTHREAD_START_ROUTINE) GetProcAddress(hKernel32, "LoadLibraryA"), pLibRemote, 0, NULL);
-    
+
 #ifdef _DEBUG
     std::cout << "Remote thread created\n";
 #endif
