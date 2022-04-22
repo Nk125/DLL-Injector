@@ -83,11 +83,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     std::cout << "Loading DLL\n";
 #endif
 
-    if (GetModuleFileNameA(LoadLibraryExA(dll.c_str(), NULL, DONT_RESOLVE_DLL_REFERENCES), &szLibPath[0], MAX_PATH) == 0) {
+    HMODULE DLL = LoadLibraryExA(dll.c_str(), NULL, DONT_RESOLVE_DLL_REFERENCES);
+
+    if (DLL == NULL) {
 #ifdef _DEBUG
         std::cout << "DLL couldn't be loaded\n";
 #endif
         exitproc(2);
+    }
+
+    if (GetModuleFileNameA(DLL, &szLibPath[0], MAX_PATH) == 0) {
+#ifdef _DEBUG
+        std::cout << "DLL PATH couldn't be retrieved\n";
+#endif
+        exitproc(2); // Treated error same as DLL load fail
     }
 
 #ifdef _DEBUG
