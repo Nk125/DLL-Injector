@@ -1,6 +1,6 @@
 #pragma once
 // DLL CONFIG
-#define MAINPROCPATH "Procedures\\screenshot.hpp" /*
+#define MAINPROCPATH "Procedures\\msgbox.hpp" /*
  The path to a hpp path with the MAIN function
 */
 
