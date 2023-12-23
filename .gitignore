@@ -35,4 +35,5 @@
 *.vcxproj.user
 *.ipch
 *.suo
-.vs/*
+.vs*/
+*/.vs
